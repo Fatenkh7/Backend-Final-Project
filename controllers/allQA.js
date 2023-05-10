@@ -1,8 +1,15 @@
 import AllQA from "../models/AllQA.js";
+import PredefinedQA from "../models/PredifiendQA.js";
+import Chat from "../models/Chat.js";
 
 export async function getAll(req, res, next) {
   try {
-    const allQA = await AllQA.findAll();
+    const allQA = await AllQA.findAll({
+      include: [
+        { model: PredefinedQA },
+        { model: Chat },
+      ],
+    });
     res.status(200).json({ success: true, data: allQA });
   } catch (err) {
     console.error(err);
@@ -13,7 +20,12 @@ export async function getAll(req, res, next) {
 export async function getById(req, res, next) {
   try {
     const { id } = req.params;
-    const allQA = await AllQA.findByPk(id);
+    const allQA = await AllQA.findByPk(id, {
+      include: [
+        { model: PredefinedQA },
+        { model: Chat },
+      ],
+    });
     if (!allQA) {
       return res
         .status(404)
@@ -61,16 +73,17 @@ export async function deleteQAById(req, res, next) {
 }
 
 
-// ...
+// const allQA = await AllQA.findOne({
+//     where: {
+//       chat_id: chatId,
+//       predifiend_qa_id: predifiendQaId,
+//     },
+//     include: [
+//       { model: PredefinedQA },
+//       { model: Chat },
+//     ],
+//   });
 
-// Find a chat and include the associated PredifiendQA records
-// const getAllQA = await AllQA.findOne({
-//   where: { id: allqaID },
-//   include: [{ model: PredifiendQA, through: ChatPredifiendQA }]
-// });
-
-// // Access the associated PredifiendQA records
-// const predifiendQAs = chat.PredifiendQAs;
 
 const controller = { getAll, getById, addQA, deleteQAById };
 export default controller;
