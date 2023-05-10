@@ -35,4 +35,7 @@ const AllQA = sequelize.define(
   }
 );
 
+AllQA.belongsTo(PredefinedQA, { foreignKey: "predifiend_qa_id" });
+AllQA.belongsTo(Chat, { foreignKey: "chat_id" });
+
 export default AllQA;

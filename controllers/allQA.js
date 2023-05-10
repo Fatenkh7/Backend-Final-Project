@@ -1,8 +1,15 @@
 import AllQA from "../models/AllQA.js";
+import PredefinedQA from "../models/PredifiendQA.js";
+import Chat from "../models/Chat.js";
 
 export async function getAll(req, res, next) {
   try {
-    const allQA = await AllQA.findAll();
+    const allQA = await AllQA.findAll({
+      include: [
+        { model: PredefinedQA },
+        { model: Chat },
+      ],
+    });
     res.status(200).json({ success: true, data: allQA });
   } catch (err) {
     console.error(err);
@@ -13,7 +20,12 @@ export async function getAll(req, res, next) {
 export async function getById(req, res, next) {
   try {
     const { id } = req.params;
-    const allQA = await AllQA.findByPk(id);
+    const allQA = await AllQA.findByPk(id, {
+      include: [
+        { model: PredefinedQA },
+        { model: Chat },
+      ],
+    });
     if (!allQA) {
       return res
         .status(404)
@@ -59,6 +71,19 @@ export async function deleteQAById(req, res, next) {
     res.status(400).json({ error: err.message });
   }
 }
+
+
+// const allQA = await AllQA.findOne({
+//     where: {
+//       chat_id: chatId,
+//       predifiend_qa_id: predifiendQaId,
+//     },
+//     include: [
+//       { model: PredefinedQA },
+//       { model: Chat },
+//     ],
+//   });
+
 
 const controller = { getAll, getById, addQA, deleteQAById };
 export default controller;

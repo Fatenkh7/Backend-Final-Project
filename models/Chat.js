@@ -41,5 +41,6 @@ const Chat = sequelize.define(
     timestamps: false,
   }
 );
+Chat.belongsTo(User, { foreignKey: "user_id" });
 
 export default Chat;

@@ -1,8 +1,11 @@
 import Chat from "../models/Chat.js";
+import User from "../models/User.js";
 
 export async function getAll(req, res, next) {
   try {
-    const chats = await Chat.findAll();
+    const chats = await Chat.findAll({
+      include: [{ model: User }],
+    });
     res.status(200).json({ success: true, data: chats });
   } catch (err) {
     console.error(err);
@@ -13,7 +16,9 @@ export async function getAll(req, res, next) {
 export async function getById(req, res, next) {
   try {
     const { id } = req.params;
-    const chats = await Chat.findByPk(id);
+    const chats = await Chat.findByPk(id, {
+      include: [{ model: User }],
+    });
     if (!chats) {
       return res
         .status(404)
