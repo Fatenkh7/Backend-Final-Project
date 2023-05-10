@@ -5,10 +5,12 @@ import cors from "cors";
 import createError from "http-errors";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-import createConnection from "./config/db.js";
+import { Sequelize } from 'sequelize';
+import userRoutes from "./routes/user.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 5000;
+const sequelize = new Sequelize('sqlite::memory:');
 
 const app = express();
 app.use(express.json());
@@ -26,19 +28,12 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// Check if the connection works by executing a simple query
-createConnection()
-  .then((connection) => {
-    connection.query("SELECT 1")
-      .then(([rows, fields]) => {
-        console.log("Connected to MySQL successfully!");
-      })
-      .catch((err) => {
-        console.error(err);
-      })
-      .finally(() => {
-        connection.end();
-      });
+app.use("/user", userRoutes);
+
+// Check if the connection works by syncing with the database
+sequelize.sync()
+  .then(() => {
+    console.log("Connected to database successfully!");
   })
   .catch((err) => {
     console.error(err);
@@ -59,5 +54,7 @@ app.use(function (err, req, res, next) {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running in ${process.env.NODE_ENV} on port ${PORT}!!!`);
+  console.log(
+    `Server is running in ${process.env.NODE_ENV} on port ${PORT}!!!`
+  );
 });
