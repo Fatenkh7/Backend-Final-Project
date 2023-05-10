@@ -60,5 +60,17 @@ export async function deleteQAById(req, res, next) {
   }
 }
 
+
+// ...
+
+// Find a chat and include the associated PredifiendQA records
+// const getAllQA = await AllQA.findOne({
+//   where: { id: allqaID },
+//   include: [{ model: PredifiendQA, through: ChatPredifiendQA }]
+// });
+
+// // Access the associated PredifiendQA records
+// const predifiendQAs = chat.PredifiendQAs;
+
 const controller = { getAll, getById, addQA, deleteQAById };
 export default controller;
