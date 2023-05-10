@@ -1,6 +1,10 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import salt from "salt";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const saltRounds = 11;
 
@@ -27,14 +31,20 @@ export async function getById(req, res, next) {
   } catch (error) {
     next(error);
   }
-};
+}
 
-export async function addUser(req, res, next) {
+export async function signUp(req, res, next) {
   try {
-    const { first_name, last_name, email,username, password } = req.body;
+    const { first_name, last_name, email, username, password } = req.body;
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
     const salt = await bcrypt.genSalt(saltRounds);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const user = new User({
+
+    const user = await User.create({
       first_name,
       last_name,
       email,
@@ -42,11 +52,13 @@ export async function addUser(req, res, next) {
       password: hashedPassword,
     });
 
-    await user.save();
+    const token = jwt.sign({ user_id: user.id }, process.env.SECRET_TOKEN, {
+      expiresIn: "1h",
+    });
 
-    res.status(201).json({ message: "User created successfully", user });
+    res.status(201).json({ message: "User created successfully", token });
   } catch (error) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: error.message });
   }
 }
 
@@ -54,7 +66,7 @@ export async function editUserById(req, res) {
   try {
     const userId = req.params.id;
     const { first_name, last_name, email, username, password } = req.body;
-    
+
     const salt = await bcrypt.genSaltSync(10);
     const hash = await bcrypt.hashSync(password, salt);
 
@@ -69,7 +81,7 @@ export async function editUserById(req, res) {
       last_name,
       email,
       username,
-      password: hash
+      password: hash,
     });
 
     res.status(200).json({ message: "Update successful", data: updatedUser });
@@ -77,7 +89,6 @@ export async function editUserById(req, res) {
     res.status(400).json({ error: err.message });
   }
 }
-
 
 export async function deleteUserById(req, res, next) {
   try {
@@ -95,5 +106,28 @@ export async function deleteUserById(req, res, next) {
   }
 }
 
-const controller = { getAll, addUser, editUserById, deleteUserById };
+export async function signIn(req, res, next) {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const token = jwt.sign({ user_id: user.id }, process.env.SECRET_TOKEN, {
+      expiresIn: "1h",
+    });
+
+    res.status(200).json({ message: "Sign in successful", token });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+const controller = { getAll, signUp, editUserById, deleteUserById };
 export default controller;
