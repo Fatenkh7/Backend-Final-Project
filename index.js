@@ -5,12 +5,13 @@ import cors from "cors";
 import createError from "http-errors";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-import { Sequelize } from 'sequelize';
+import { Sequelize } from "sequelize";
 import userRoutes from "./routes/user.js";
+import chatRoutes from "./routes/chat.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 5000;
-const sequelize = new Sequelize('sqlite::memory:');
+const sequelize = new Sequelize("sqlite::memory:");
 
 const app = express();
 app.use(express.json());
@@ -29,9 +30,11 @@ app.get("/", (req, res) => {
 });
 
 app.use("/user", userRoutes);
+app.use("/chat", chatRoutes);
 
 // Check if the connection works by syncing with the database
-sequelize.sync()
+sequelize
+  .sync()
   .then(() => {
     console.log("Connected to database successfully!");
   })
