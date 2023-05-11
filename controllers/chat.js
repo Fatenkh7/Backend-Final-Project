@@ -1,5 +1,6 @@
 import Chat from "../models/Chat.js";
 import User from "../models/User.js";
+import switcher from "../middleware/switchingCase.js";
 
 export async function getAll(req, res, next) {
   try {
@@ -34,6 +35,11 @@ export async function addChat(req, res, next) {
   try {
     const { question, answer, type, user_id } = req.body;
 
+    // Validate required fields
+    if (!question || !type || !user_id) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     const newChat = new Chat({
       question,
       answer,
@@ -46,7 +52,7 @@ export async function addChat(req, res, next) {
     res
       .status(201)
       .json({ message: "The chat has been created successfully", newChat });
-  } catch (error) {
+  } catch (err) {
     res.status(400).json({ error: err.message });
   }
 }
