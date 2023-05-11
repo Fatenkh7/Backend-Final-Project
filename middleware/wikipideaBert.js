@@ -1,94 +1,80 @@
+import * as tf from "@tensorflow/tfjs";
+import * as qna from "@tensorflow-models/qna";
 import axios from "axios";
-import "@huggingface/inference";
+import NodeCache from "node-cache";
 
-export default async function getWikipediaAnswer(searchTerm, question) {
-  let bertModel;
-  let bertTokenizer;
+const cache = new NodeCache({ stdTTL: 300, checkperiod: 600 });
 
-  async function initializeBERT() {
-    // Initialize a BERT model
-    bertModel = await transformers.AutoModelForQuestionAnswering.fromPretrained(
-      "bert-large-uncased-whole-word-masking-finetuned-squad"
-    );
+let qnaModel;
 
-    // Initialize a tokenizer
-    bertTokenizer = await transformers.AutoTokenizer.fromPretrained(
-      "bert-large-uncased-whole-word-masking-finetuned-squad"
-    );
+async function initializeQnAModel() {
+  // Initialize the QnA model
+  qnaModel = await qna.load();
+}
+
+async function getWikipediaAnswer() {
+  const question = "Who is Albert Einstein?";
+
+  // Check if the answer is already cached
+  const cachedAnswer = cache.get(question);
+  if (cachedAnswer) {
+    return cachedAnswer;
   }
 
-  async function getWikipediaAnswer(searchTerm, question) {
-    // Initialize BERT if necessary
-    if (!bertModel || !bertTokenizer) {
-      await initializeBERT();
-    }
+  // Initialize the QnA model if necessary
+  if (!qnaModel) {
+    await initializeQnAModel();
+  }
 
-    const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${searchTerm}&exintro=1`;
+  const url = `https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=1&titles=Albert%20Einstein`;
 
-    try {
-      const response = await axios.get(url);
-      const pages = response.data.query.pages;
+  try {
+    const response = await axios.get(url);
+    const pages = response.data.query.pages;
 
-      // Check if no pages were returned
-      if (Object.keys(pages).length === 0) {
-        console.log(`No results found for '${searchTerm}'.`);
-        return { answer: null, score: null };
-      }
-
-      // Check if multiple pages were returned
-      if (Object.keys(pages).length > 1) {
-        console.log(
-          `Multiple results found for '${searchTerm}'. Returning content for the first page.`
-        );
-        const pageIds = Object.keys(pages);
-        const firstPageId = pageIds[0];
-        return { answer: pages[firstPageId].extract, score: null };
-      }
-
-      // Otherwise, extract the page content and answer the question
-      const pageId = Object.keys(pages)[0];
-      const extract = pages[pageId].extract;
-
-      // Encode the input
-      const encoded = await bertTokenizer.encodePlus(question, extract, {
-        truncation: true,
-        padding: true,
-      });
-
-      // Run the model on the encoded input
-      const input = {
-        input_ids: encoded.input_ids,
-        attention_mask: encoded.attention_mask,
-      };
-      const output = await bertModel.predict(input);
-
-      // Extract the answer from the output
-      const answerStartIndex = output.start_logits.indexOf(
-        Math.max(...output.start_logits)
-      );
-      const answerEndIndex =
-        output.end_logits.indexOf(Math.max(...output.end_logits)) + 1;
-      const answer = extract.substring(
-        encoded.offsets[answerStartIndex][0],
-        encoded.offsets[answerEndIndex][1]
-      );
-      const score = Math.max(...output.start_logits);
-
-      return { answer, score };
-    } catch (error) {
-      console.log(error);
+    // Check if no pages were returned
+    if (Object.keys(pages).length === 0) {
+      console.log(`No results found for '${question}'.`);
       return { answer: null, score: null };
     }
+
+    // Check if multiple pages were returned
+    if (Object.keys(pages).length > 1) {
+      console.log(
+        `Multiple results found for '${question}'. Returning content for the first page.`
+      );
+      const pageIds = Object.keys(pages);
+      const firstPageId = pageIds[0];
+      const answer = { answer: pages[firstPageId].extract, score: null };
+
+      // Cache the answer for future use
+      cache.set(question, answer);
+
+      return answer;
+    }
+
+    // Otherwise, extract the page content and answer the question
+    const pageId = Object.keys(pages)[0];
+    const extract = pages[pageId].extract;
+
+    // Use the QnA model to answer the question
+    const answers = await qnaModel.findAnswers(question, extract);
+    if (answers.length === 0) {
+      console.log(`No answers found for '${question}'.`);
+      return { answer: null, score: null };
+    }
+
+    // Return the best answer and its score
+    const answer = { answer: answers[0].text, score: answers[0].score };
+
+    // Cache the answer for future use
+    cache.set(question, answer);
+
+    return answer;
+  } catch (error) {
+    console.log(error);
+    return { answer: null, score: null };
   }
-
-  async function main() {
-    await initializeBERT();
-
-    const searchTerm = prompt("Enter your search term:");
-    const question = prompt("What is your question?");
-    const { answer, score } = await getWikipediaAnswer(searchTerm, question);
-    console.log(`Answer: ${answer}\nScore: ${score}`);
-  }
-
-  main();
 }
+
+export default getWikipediaAnswer;

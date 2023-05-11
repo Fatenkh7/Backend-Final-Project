@@ -4,8 +4,6 @@ import Chat from "../models/Chat.js";
 import AllQA from "../models/AllQA.js";
 
 export default async function switcher(req, res, next) {
-  let bestAnswer;
-
   try {
     switch (true) {
       // Check for answer in predefined QA
@@ -28,17 +26,9 @@ export default async function switcher(req, res, next) {
         console.log(`Answer found from chat: ${existingChat.answer}`);
         return res.status(200).json({ answer: existingChat.answer });
 
-      // Check for answer in AllQA
-      case !!(await AllQA.findOne({ where: { question: req.body.question } })):
-        const existingQA = await AllQA.findOne({
-          where: { question: req.body.question },
-        });
-        console.log(`Answer found from AllQA pred: ${existingQA.answer}`);
-        return res.status(200).json({ answer: existingQA.answer });
-
       // Get answer from Wikipedia
-      default:
-        bestAnswer = await getWikipediaAnswer(req.body.question);
+      case true:
+        const bestAnswer = await getWikipediaAnswer(req.body.question);
         if (bestAnswer) {
           console.log(`Answer from wiki: ${bestAnswer}`);
           return res.status(200).json({ answer: bestAnswer });
