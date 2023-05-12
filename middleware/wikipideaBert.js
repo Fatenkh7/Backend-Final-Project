@@ -22,36 +22,37 @@ async function getWikipediaAnswer(question) {
     return cachedAnswer;
   }
 
-  // Initialize the QnA model if necessary
-
   // Construct the Wikipedia API query URL
   const encodedQuestion = encodeURIComponent(question.trim());
-  const url = `https://en.m.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&origin=*&prop=pageimages%7Cdescription&piprop=thumbnail&pithumbsize=160&pilimit=3&generator=search&gsrsearch=${encodedQuestion}&gsrnamespace=0&gsrlimit=3&gsrqiprofile=classic_noboostlinks&uselang=content&smaxage=86400&maxage=86400`;
-
+  const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodedQuestion}&utf8=`;
+  
   try {
-    const response = await axios.get(url);
-    const pageId = response.data.query.pages[0];
-    // const extract = response.data.query.pages[0].pageId;
-
+    const response = await axios.get(apiUrl);
+    const pages = response.data.query.search;
+    const page = pages[0];
+    const content = page.snippet;
+    console.log(content);
+  
     // Use the QnA model to answer the question
-    const answers = await qnaModel.findAnswers(question.trim(), pageId);
-    console.log("answers", answers); // print out the array of answers
+    const answers = await qnaModel.findAnswers(question, content);
+    console.log("response.data", content);
     if (answers.length === 0) {
       console.log(`No answers found for '${question}'.`);
       return { answer: null, score: null };
     }
-
+  
     // Return the best answer and its score
     const answer = { answer: answers[0].text, score: answers[0].score };
-
+  
     // Cache the answer for future use
     cache.set(question, answer);
-
+  
     return answer;
   } catch (error) {
-    console.log(error);
+    console.error(`Error fetching Wikipedia page: ${error}`);
     return { answer: null, score: null };
   }
+  
 }
 
 export default getWikipediaAnswer;
