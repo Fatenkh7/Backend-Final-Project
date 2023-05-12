@@ -30,6 +30,7 @@ export default async function switcher(req, res, next) {
       case true:
         const bestAnswer = await getWikipediaAnswer(req.body.question);
         if (bestAnswer) {
+          console.log("switcch",bestAnswer.answers)
           console.log(`Answer from wiki: ${bestAnswer}`);
           return res.status(200).json({ answer: bestAnswer });
         }
