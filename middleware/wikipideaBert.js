@@ -26,17 +26,15 @@ async function getWikipediaAnswer(question) {
 
   // Construct the Wikipedia API query URL
   const encodedQuestion = encodeURIComponent(question.trim());
-  const url = `https://en.m.wikipedia.org/w/index.php?search=${encodedQuestion}&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1`;
+  const url = `https://en.m.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&origin=*&prop=pageimages%7Cdescription&piprop=thumbnail&pithumbsize=160&pilimit=3&generator=search&gsrsearch=${encodedQuestion}&gsrnamespace=0&gsrlimit=3&gsrqiprofile=classic_noboostlinks&uselang=content&smaxage=86400&maxage=86400`;
 
   try {
     const response = await axios.get(url);
-    const pages = response;
-    console.log("responseee",response);
-    const pageId = Object.keys(pages)[0];
-    const extract = pages[pageId].extract;
+    const pageId = response.data.query.pages[0];
+    // const extract = response.data.query.pages[0].pageId;
 
     // Use the QnA model to answer the question
-    const answers = await qnaModel.findAnswers(question.trim(), extract);
+    const answers = await qnaModel.findAnswers(question.trim(), pageId);
     console.log("answers", answers); // print out the array of answers
     if (answers.length === 0) {
       console.log(`No answers found for '${question}'.`);
