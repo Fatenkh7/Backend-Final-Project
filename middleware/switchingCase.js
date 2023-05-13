@@ -28,11 +28,11 @@ export default async function switcher(req, res, next) {
 
       // Get answer from Wikipedia
       case true:
-        const bestAnswer = await getWikipediaAnswer(req.body.question);
-        if (bestAnswer) {
-          console.log("switcch",bestAnswer.answers)
-          console.log(`Answer from wiki: ${bestAnswer}`);
-          return res.status(200).json({ answer: bestAnswer });
+        const answer = await getWikipediaAnswer(req.body.question);
+        if (answer) {
+          console.log("switcch",answer)
+          console.log(`Answer from wiki: ${answer}`);
+          return res.status(200).json({ answer: answer });
         }
 
         // If no answer found

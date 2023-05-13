@@ -2,6 +2,9 @@ import * as tf from "@tensorflow/tfjs";
 import * as qna from "@tensorflow-models/qna";
 import axios from "axios";
 import NodeCache from "node-cache";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const cache = new NodeCache({ stdTTL: 300, checkperiod: 600 });
 
@@ -30,19 +33,20 @@ async function getWikipediaAnswer(question) {
     const response = await axios.get(apiUrl);
     const pages = response.data.query.search;
     const page = pages[0];
-    const content = page.snippet;
+    console.log("pages0", page);
+    const content = page.snippet.replace(/<[^>]+>/g, "");
     console.log("content", content);
 
     // Use the QnA model to answer the question
-    const answers = await qnaModel.findAnswers(question, content);
-    console.log("response.data", content);
-    if (answers.length === 0) {
-      console.log(`No answers found for '${question}'.`);
-      return { answer: null, score: null };
-    }
+    // const answers = await qnaModel.findAnswers(question, content);
+    // console.log("response.data", content);
+    // if (answers.length === 0) {
+    //   console.log(`No answers found for '${question}'.`);
+    //   return { answer: null, score: null };
+    // }
 
     // Return the best answer and its score
-    const answer = { answer: answers[0].text, score: answers[0].score };
+    const answer = { answer: content, };
 
     // Cache the answer for future use
     cache.set(question, answer);
