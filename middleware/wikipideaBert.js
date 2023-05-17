@@ -2,21 +2,18 @@ import * as tf from "@tensorflow/tfjs";
 import * as qna from "@tensorflow-models/qna";
 import axios from "axios";
 import NodeCache from "node-cache";
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const cache = new NodeCache({ stdTTL: 300, checkperiod: 600 });
 
-let qnaModel;
-if (!qnaModel) {
-  await initializeQnAModel();
-}
+// let qnaModel;
+// if (!qnaModel) {
+//   await initializeQnAModel();
+// }
 
-async function initializeQnAModel() {
-  // Initialize the QnA model
-  qnaModel = await qna.load();
-}
+// async function initializeQnAModel() {
+//   // Initialize the QnA model
+//   qnaModel = await qna.load();
+// }
 
 async function getWikipediaAnswer(question) {
   // Check if the answer is already cached
@@ -37,24 +34,13 @@ async function getWikipediaAnswer(question) {
     const content = page.snippet.replace(/<[^>]+>/g, "");
     console.log("content", content);
 
-    // Use the QnA model to answer the question
-    // const answers = await qnaModel.findAnswers(question, content);
-    // console.log("response.data", content);
-    // if (answers.length === 0) {
-    //   console.log(`No answers found for '${question}'.`);
-    //   return { answer: null, score: null };
-    // }
-
-    // Return the best answer and its score
-    const answer = { answer: content, };
-
     // Cache the answer for future use
-    cache.set(question, answer);
-    console.log(answer);
-    return answer;
+    cache.set(question, content);
+    console.log(content);
+    return content;
   } catch (error) {
     console.error(`Error fetching Wikipedia page: ${error}`);
-    return { answer: null, score: null };
+    return null;
   }
 }
 

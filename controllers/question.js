@@ -5,6 +5,9 @@ export async function addQuestion(req, res, next) {
   try {
     const { question } = req.body;
 
+    // Convert question to lowercase and trim it
+    question = question.toLowerCase().trim();
+    
     // If there is no existing answer, get the answer using the switcher middleware
     const newAnswer = await switcher(req, res, next);
 
