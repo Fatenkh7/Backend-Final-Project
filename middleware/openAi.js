@@ -1,50 +1,60 @@
-import * as tf from "@tensorflow/tfjs";
-import * as qna from "@tensorflow-models/qna";
 import axios from "axios";
-import NodeCache from "node-cache";
+import dotenv from "dotenv";
+dotenv.config();
 
-const cache = new NodeCache({ stdTTL: 300, checkperiod: 600 });
+const WORD_REPLACEMENT = [
+  {
+    word: "openai",
+    replacement: "MashedBot",
+  },
+  {
+    word: "chatgpt",
+    replacement: "{{name}}",
+  },
+];
 
-// let qnaModel;
-// if (!qnaModel) {
-//   await initializeQnAModel();
-// }
-
-// async function initializeQnAModel() {
-//   // Initialize the QnA model
-//   qnaModel = await qna.load();
-// }
-
-async function getOpenAiAnswer(question) {
-  // Check if the answer is already cached
-  const cachedAnswer = cache.get(question);
-  if (cachedAnswer) {
-    return cachedAnswer;
-  }
-
-  // Construct the Wikipedia API query URL
-  const encodedQuestion = encodeURIComponent(question.trim());
-  const apiUrl = `https://api.openai.com/v1/engines/text-davinci-003/completions/${encodedQuestion}`;
-
+async function getChatGptResponse(pmt) {
   try {
-    const response = await axios.get(apiUrl);
-    console.log(response)
-    // Extract the answer from the response
-    const answer = response.data.choices[0].text.trim();
-    // const pages = response.data.query.search;
-    // const page = pages[0];
-    // console.log("pages0", page);
-    // const content = page.snippet.replace(/<[^>]+>/g, "");
-    // console.log("content", content);
+    const response = await axios.post(
+      "https://api.openai.com/v1/engines/text-davinci-003/completions",
+      {
+        prompt: pmt,
+        max_tokens: 1500,
+        temperature: 1,
+        top_p: 0,
+        n: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.API_KEY}`,
+        },
+      }
+    );
 
-    // Cache the answer for future use
-    cache.set(question, answer);
-    console.log(answer);
-    return answer;
+    if (
+      response.data.choices &&
+      response.data.choices.length > 0 &&
+      response.data.choices[0].text
+    ) {
+      return postProcessingResponse(response.data.choices[0].text);
+    } else {
+      return "";
+    }
   } catch (error) {
-    console.error(`Error fetching ai page: ${error}`);
-    return null;
+    console.error("Error:", error.message);
+    return "";
   }
 }
 
-export default getOpenAiAnswer;
+async function postProcessingResponse(params) {
+  WORD_REPLACEMENT.forEach((element) => {
+    const regex = new RegExp(element.word, "gi");
+    params = params.replace(regex, element.replacement);
+  });
+  return params;
+}
+
+export { getChatGptResponse };

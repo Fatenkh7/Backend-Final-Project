@@ -1,7 +1,7 @@
 import predefqa from "../models/PredifiendQA.js";
 import Chat from "../models/Chat.js";
 import getWikipediaAnswer from "./wikipideaBert.js";
-import getOpenAiAnswer from "./openAi.js";
+import { getChatGptResponse } from "./openAi.js";
 
 export default async function switcher(req, res, next) {
   try {
@@ -28,7 +28,7 @@ export default async function switcher(req, res, next) {
 
       // Get answer from OpenAI
       case true:
-        const openAiAnswer = await getOpenAiAnswer(req.body.question);
+        const openAiAnswer = await getChatGptResponse(req.body.question);
         if (openAiAnswer) {
           console.log(`Answer from OpenAI: ${openAiAnswer}`);
 
@@ -43,22 +43,22 @@ export default async function switcher(req, res, next) {
           return res.status(200).json({ answer: openAiAnswer });
         }
 
-      // // Get answer from Wikipedia
-      // case true:
-      //   const wikipediaAnswer = await getWikipediaAnswer(req.body.question);
-      //   if (wikipediaAnswer) {
-      //     console.log(`Answer from Wikipedia: ${wikipediaAnswer}`);
+      // Get answer from Wikipedia
+      case true:
+        const wikipediaAnswer = await getWikipediaAnswer(req.body.question);
+        if (wikipediaAnswer) {
+          console.log(`Answer from Wikipedia: ${wikipediaAnswer}`);
 
-      //     // Save the question, answer, type, and user ID in the Chat model
-      //     const chatWikipedia = await Chat.create({
-      //       question: req.body.question,
-      //       answer: wikipediaAnswer,
-      //       type: "wikipedia",
-      //       user_id: req.user.id, // Assuming user ID is available in req.user
-      //     });
+          // Save the question, answer, type, and user ID in the Chat model
+          const chatWikipedia = await Chat.create({
+            question: req.body.question,
+            answer: wikipediaAnswer,
+            type: "wikipedia",
+            user_id: req.user.id, // Assuming user ID is available in req.user
+          });
 
-      //     return res.status(200).json({ answer: wikipediaAnswer });
-      //   }
+          return res.status(200).json({ answer: wikipediaAnswer });
+        }
 
       // If no answer found
       default:

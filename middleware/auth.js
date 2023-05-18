@@ -6,13 +6,13 @@ export async function authenticateUser(req, res, next) {
     // Check for the "Authorization" header
     const authHeader = req.headers["authorization"];
     if (!authHeader) {
-      return res.status(401).json({ message: "byy Authentication required" });
+      return res.status(401).json({ message: "You need to login" });
     }
 
     // Extract the token from the header
     const token = authHeader.split(" ")[1];
     if (!token) {
-      return res.status(401).json({ message: "hii Authentication required" });
+      return res.status(401).json({ message: " Authentication required" });
     }
 
     // Verify and decode the token
