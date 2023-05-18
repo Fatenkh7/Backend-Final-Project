@@ -6,7 +6,7 @@ export async function getAll(req, res, next) {
     res.status(200).json({ success: true, data: preQA });
   } catch (err) {
     console.error(err);
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: err.message  });
   }
 }
 
@@ -29,7 +29,7 @@ export async function addPreQA(req, res, next) {
   try {
     const { question, answer } = req.body;
 
-    const preQA = new PreQA({
+    const preQA = await PreQA.create({
       question,
       answer,
     });
@@ -38,7 +38,7 @@ export async function addPreQA(req, res, next) {
 
     res.status(201).json({ message: "The Pre-QA created successfully", preQA });
   } catch (error) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: error.message });
   }
 }
 
@@ -60,7 +60,7 @@ export async function editPreQAById(req, res) {
 
     res.status(200).json({ message: "Update successful", data: updatedPreQa });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: err.message  });
   }
 }
 
@@ -76,7 +76,7 @@ export async function deletePreQAById(req, res, next) {
     res.status(200).json({ message: "This Pre-QA is deleted successfully" });
   } catch (err) {
     console.error(err);
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: err.message  });
   }
 }
 

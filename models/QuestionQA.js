@@ -1,8 +1,8 @@
 import { Sequelize, Model, DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
 
-const PredifiendQA = sequelize.define(
-  "predifiend_qa",
+const QuestionQA = sequelize.define(
+  "question",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -15,18 +15,13 @@ const PredifiendQA = sequelize.define(
     },
     answer: {
       type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    create_date: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
+      allowNull: true,
     },
   },
   {
-    tableName: "predifiend_qa",
+    tableName: "question",
     timestamps: false,
   }
 );
 
-export default PredifiendQA;
+export default QuestionQA;

@@ -1,8 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
-import salt from "salt";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -62,6 +61,29 @@ export async function signUp(req, res, next) {
   }
 }
 
+export async function signIn(req, res, next) {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const token = jwt.sign({ user_id: user.id }, process.env.SECRET_TOKEN, {
+      expiresIn: "1h",
+    });
+
+    res.status(200).json({ message: "Sign in successful", token });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
 export async function editUserById(req, res) {
   try {
     const userId = req.params.id;
@@ -106,28 +128,12 @@ export async function deleteUserById(req, res, next) {
   }
 }
 
-export async function signIn(req, res, next) {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    const token = jwt.sign({ user_id: user.id }, process.env.SECRET_TOKEN, {
-      expiresIn: "1h",
-    });
-
-    res.status(200).json({ message: "Sign in successful", token });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-}
-
-const controller = { getAll, signUp, editUserById, deleteUserById };
+const controller = {
+  getAll,
+  signUp,
+  signIn,
+  getById,
+  editUserById,
+  deleteUserById,
+};
 export default controller;

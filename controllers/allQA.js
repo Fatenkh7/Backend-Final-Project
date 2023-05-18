@@ -52,7 +52,7 @@ export async function addQA(req, res, next) {
       .status(201)
       .json({ message: "This QA has been created successfully", newQA });
   } catch (error) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: error.message });
   }
 }
 
