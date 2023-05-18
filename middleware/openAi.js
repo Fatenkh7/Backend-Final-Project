@@ -8,7 +8,7 @@ const WORD_REPLACEMENT = [
     replacement: "MashedBot",
   },
   {
-    word: "chatgpt",
+    word: "MashedBot",
     replacement: "{{name}}",
   },
 ];
@@ -39,7 +39,10 @@ async function getChatGptResponse(pmt) {
       response.data.choices.length > 0 &&
       response.data.choices[0].text
     ) {
-      return postProcessingResponse(response.data.choices[0].text);
+      const processedResponse = postProcessingResponse(
+        response.data.choices[0].text
+      );
+      return processedResponse.split("\n\n");
     } else {
       return "";
     }
