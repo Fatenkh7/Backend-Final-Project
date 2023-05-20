@@ -39,10 +39,14 @@ async function getChatGptResponse(pmt) {
       response.data.choices.length > 0 &&
       response.data.choices[0].text
     ) {
-      const processedResponse = postProcessingResponse(
+      let processedResponse = await postProcessingResponse(
         response.data.choices[0].text
       );
-      return processedResponse.split("\n\n");
+      if (processedResponse.length < 10) {
+        processedResponse = "Result is:" + processedResponse;
+      }
+      processedResponse = processedResponse.replace("\n\n", "");
+      return processedResponse;
     } else {
       return "";
     }

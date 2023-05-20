@@ -18,12 +18,16 @@ const sequelize = new Sequelize("sqlite::memory:");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+  optionsSuccessStatus: 200,
+  origin: "http://localhost:3000",
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
