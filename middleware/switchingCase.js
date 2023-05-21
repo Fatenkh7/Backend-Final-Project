@@ -44,21 +44,21 @@ export default async function switcher(req, res, next) {
         }
 
       // Get answer from Wikipedia
-      // case true:
-      //   const wikipediaAnswer = await getWikipediaAnswer(req.body.question);
-      //   if (wikipediaAnswer) {
-      //     console.log(`Answer from Wikipedia: ${wikipediaAnswer}`);
+      case true:
+        const wikipediaAnswer = await getWikipediaAnswer(req.body.question);
+        if (wikipediaAnswer) {
+          console.log(`Answer from Wikipedia: ${wikipediaAnswer}`);
 
-      //     // Save the question, answer, type, and user ID in the Chat model
-      //     const chatWikipedia = await Chat.create({
-      //       question: req.body.question,
-      //       answer: wikipediaAnswer,
-      //       type: "wikipedia",
-      //       user_id: req.user.id, // Assuming user ID is available in req.user
-      //     });
+          // Save the question, answer, type, and user ID in the Chat model
+          const chatWikipedia = await Chat.create({
+            question: req.body.question,
+            answer: wikipediaAnswer,
+            type: "wikipedia",
+            user_id: req.user.id, // Assuming user ID is available in req.user
+          });
 
-      //     return res.status(200).json({ answer: wikipediaAnswer });
-      //   }
+          return res.status(200).json({ answer: wikipediaAnswer });
+        }
 
       // If no answer found
       default:
