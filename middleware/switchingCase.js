@@ -37,7 +37,7 @@ export default async function switcher(req, res, next) {
             question: req.body.question,
             answer: openAiAnswer,
             type: "chtag",
-            user_id: req.user.id, // Assuming user ID is available in req.user
+            user_id: req.user.id,
           });
 
           return res.status(200).json({ answer: openAiAnswer });
@@ -54,7 +54,7 @@ export default async function switcher(req, res, next) {
             question: req.body.question,
             answer: wikipediaAnswer,
             type: "wikipedia",
-            user_id: req.user.id, // Assuming user ID is available in req.user
+            user_id: req.user.id,
           });
 
           return res.status(200).json({ answer: wikipediaAnswer });
