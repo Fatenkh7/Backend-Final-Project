@@ -8,7 +8,7 @@ import {
   signIn,
   signUp,
 } from "../controllers/user.js";
-import {authenticateUser} from "../middleware/auth.js";
+import { authenticateUser } from "../middleware/auth.js";
 
 router.get("/", authenticateUser, getAll);
 router.post("/signin", signIn);

@@ -20,7 +20,7 @@ const app = express();
 app.use(express.json());
 const corsOptions = {
   optionsSuccessStatus: 200,
-  origin: "http://localhost:3000",
+  origin: "https://mashed-bot.onrender.com",
   credentials: true,
 };
 app.use(cors(corsOptions));
