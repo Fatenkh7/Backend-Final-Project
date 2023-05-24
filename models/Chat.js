@@ -30,6 +30,10 @@ const Chat = sequelize.define(
         key: "id",
       },
     },
+    feedback: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     create_date: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

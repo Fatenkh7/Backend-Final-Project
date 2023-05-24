@@ -33,7 +33,7 @@ export async function getById(req, res, next) {
 
 export async function addChat(req, res, next) {
   try {
-    const { question, answer, type, user_id } = req.body;
+    const { question, answer, type, user_id, feedback } = req.body;
 
     // Validate required fields
     if (!question || !type || !user_id) {
@@ -45,6 +45,7 @@ export async function addChat(req, res, next) {
       answer,
       type,
       user_id,
+      feedback,
     });
 
     await newChat.save();

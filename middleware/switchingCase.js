@@ -38,6 +38,7 @@ export default async function switcher(req, res, next) {
             answer: openAiAnswer,
             type: "chtag",
             user_id: req.user.id,
+            feedback: req.body.feedback,
           });
 
           return res.status(200).json({ answer: openAiAnswer });
@@ -55,6 +56,7 @@ export default async function switcher(req, res, next) {
             answer: wikipediaAnswer,
             type: "wikipedia",
             user_id: req.user.id,
+            feedback: req.body.feedback,
           });
 
           return res.status(200).json({ answer: wikipediaAnswer });
