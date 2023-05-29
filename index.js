@@ -11,6 +11,7 @@ import chatRoutes from "./routes/chat.js";
 import preQARoutes from "./routes/predifiendQA.js";
 import allQARoutes from "./routes/allQA.js";
 import questionRoutes from "./routes/question.js";
+import messageRoutes from "./routes/contact.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 5000;
@@ -42,6 +43,7 @@ app.use("/chat", chatRoutes);
 app.use("/qa", preQARoutes);
 app.use("/allqa", allQARoutes);
 app.use("/question", questionRoutes);
+app.use("/contact", messageRoutes);
 
 // Check if the connection works by syncing with the database
 sequelize
