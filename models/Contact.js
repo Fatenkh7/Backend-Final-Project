@@ -25,9 +25,14 @@ const Contact = sequelize.define('contact', {
     allowNull: false,
     
   },
+  create_date: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+    allowNull: false,
+  },
 }, {
   tableName: 'contact',
-  timestamps: true,
+  timestamps: false,
 });
 
 export default Contact;
